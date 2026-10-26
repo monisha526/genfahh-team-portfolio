@@ -10,7 +10,6 @@ import {
   Code2,
   Database,
   ExternalLink,
-  FileDown,
   Filter,
   Github,
   Globe2,
@@ -26,7 +25,6 @@ import {
   Network,
   Palette,
   Play,
-  Plus,
   Radar,
   Send,
   ServerCog,
@@ -166,12 +164,6 @@ const services = [
   ["05", "Video & social content", "Short-form technical content, reels, editing, scripting, and creator workflows.", Play],
   ["06", "Research & documentation", "Research support, project documentation, technical presentations, and structured reports.", Layers3],
 ] as const;
-
-const certificationItems = [
-  ["AI & Data Science", "Learning track", "2025"],
-  ["Hackathon participation", "Innovation sprint", "2025"],
-  ["Smart street light + water level monitoring", "Hardware mini engineering project · IoT", "2025"],
-];
 
 type TeamMember = {
   slug: string;
@@ -359,35 +351,37 @@ export default function Home() {
     setMenuOpen(false);
   };
 
-  const downloadResume = () => {
-    const resume = `B.PRADHEEP\nAI & DATA SCIENCE STUDENT\n\nFocus: Artificial Intelligence, Data Science, Web Development, Design\n\nGoal\nBuild innovative AI-powered solutions and contribute to real-world technology projects.\n\nSelected work\n- CareFlow AI\n- Automated Advanced Parking Slot Management System\n- Explainable Phishing URL Detection\n- AI-Based Landslide Risk Monitoring System\n- Electricity Theft Detection Using Graph Neural Networks\n\nContact: genfahh@gmail.com`;
-    const blob = new Blob([resume], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "genfahh-resume.txt";
-    anchor.click();
-    URL.revokeObjectURL(url);
-    setToast("Resume download started.");
+  const openGitHubProfile = () => {
+    window.open("https://github.com/bpradheep110807-ctrl", "_blank", "noopener,noreferrer");
   };
 
-  const showPlaceholderToast = (message: string) => setToast(message);
+  const openProjectGitHubSearch = (projectTitle: string) => {
+    const query = encodeURIComponent(`\"${projectTitle}\"`);
+    window.open(`https://github.com/search?q=${query}&type=repositories`, "_blank", "noopener,noreferrer");
+  };
+
+  const showToast = (message: string) => setToast(message);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!form.name || !form.email || !form.subject || !form.message) {
-      setFormError("Please complete every field so I know how to respond.");
+    if (!form.name.trim() || !form.email.trim() || !form.subject.trim() || !form.message.trim()) {
+      setFormError("Please complete every field before preparing your message.");
       setFormSent(false);
       return;
     }
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
       setFormError("Please enter a valid email address.");
       setFormSent(false);
       return;
     }
+
+    const subject = encodeURIComponent(`[GENFAHH Website] ${form.subject.trim()}`);
+    const body = encodeURIComponent(
+      `Name: ${form.name.trim()}\nReply email: ${form.email.trim()}\n\nMessage:\n${form.message.trim()}`,
+    );
     setFormError("");
     setFormSent(true);
-    setForm({ name: "", email: "", subject: "", message: "" });
+    window.location.href = `mailto:genfahhteam@gmail.com?subject=${subject}&body=${body}`;
   };
 
   if (isLoading) {
@@ -444,7 +438,7 @@ export default function Home() {
               <p className="hero-intro">Hi, I&apos;m <strong>Pradheep</strong> — an AI &amp; Data Science student, developer, designer, and curious maker turning ambitious ideas into clear, human-centered digital experiences.</p>
               <div className="hero-actions">
                 <button className="button button-primary" type="button" onClick={() => scrollTo("work")}>Explore my work <ArrowDownRight size={17} /></button>
-                <button className="button button-quiet" type="button" onClick={downloadResume}><FileDown size={16} /> Download resume</button>
+                <button className="button button-quiet" type="button" onClick={openGitHubProfile}><Github size={16} /> Explore GitHub</button>
               </div>
               <div className="hero-meta"><span><MapPin size={14} /> India · open to remote</span><span className="meta-separator" /><span><Zap size={14} /> learning in public</span></div>
             </div>
@@ -535,7 +529,7 @@ export default function Home() {
           <div className="container">
             <div className="work-heading"><SectionHeading kicker="05 — Selected work" title="Ideas, made tangible." copy="A few projects where I explored how technology can be more useful, explainable, and human." /><div className="project-filters"><Filter size={15} />{(["all", "web", "ai", "research"] as const).map((filter) => <button key={filter} className={projectFilter === filter ? "active" : ""} type="button" onClick={() => setProjectFilter(filter)}>{filter === "all" ? "All work" : filter}</button>)}</div></div>
             <div className="projects-grid">{visibleProjects.map((project, index) => { const ProjectIcon = project.icon; return <article className={`project-card accent-${project.accent} reveal-up delay-${Math.min(index % 4, 3)}`} key={project.id} onClick={() => setSelectedProject(project)} tabIndex={0} onKeyDown={(event) => event.key === "Enter" && setSelectedProject(project)}><div className="project-card-top"><span>{project.eyebrow}</span><ProjectIcon size={20} /></div><div className="project-visual"><div className="visual-grid" /><div className="project-icon-wrap"><ProjectIcon size={30} /></div><span className="project-metric">{project.metric}<small>{project.metricLabel}</small></span></div><div className="project-copy"><h3>{project.title}</h3><p>{project.description}</p><div className="tag-row">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div><div className="project-link">View case study <ArrowUpRight size={15} /></div></article>; })}</div>
-            <div className="work-footer"><span><Sparkles size={16} /> More experiments in progress</span><button type="button" onClick={() => showPlaceholderToast("The full project archive is coming soon.")}>View archive <ArrowUpRight size={15} /></button></div>
+            <div className="work-footer"><span><Sparkles size={16} /> More experiments in progress</span><button type="button" onClick={openGitHubProfile}>Explore GitHub repositories <ArrowUpRight size={15} /></button></div>
           </div>
         </section>
 
@@ -548,19 +542,35 @@ export default function Home() {
         </section>
 
         <section className="certifications-section section-pad section-dark">
-          <div className="container cert-layout"><div><SectionHeading kicker="06 — Credentials" title="Learning, documented." copy="A growing shelf of certificates, challenges, and milestones. Add new proof points as the journey continues." /><button className="button button-quiet" type="button" onClick={() => showPlaceholderToast("Certificate upload is ready for your next credential.")}><Plus size={16} /> Add certificate</button></div><div className="cert-list">{certificationItems.map(([title, org, year], index) => <div className="cert-card reveal-up" key={title}><div className="cert-icon"><GraduationCap size={18} /></div><div><span>{org}</span><h3>{title}</h3><small>{year} · credential placeholder</small></div><button type="button" aria-label={`View ${title}`} onClick={() => showPlaceholderToast("Add your certificate URL to make this card live.")}><ExternalLink size={16} /></button></div>)}</div></div>
+          <div className="container cert-layout">
+            <div>
+              <SectionHeading kicker="06 — Current focus" title="Learning by building." copy="We share real project work and learning milestones. Verified certificates will be added here when available." />
+            </div>
+            <div className="cert-list">
+              {[
+                ["AI & Data Science", "Learning and experimentation", "Ongoing"],
+                ["Hackathon prototypes", "Problem-solving and product development", "In progress"],
+                ["IoT monitoring project", "Smart street-light and water-level monitoring", "Project work"],
+              ].map(([title, detail, status]) => (
+                <div className="cert-card reveal-up" key={title}>
+                  <div className="cert-icon"><GraduationCap size={18} /></div>
+                  <div><span>{detail}</span><h3>{title}</h3><small>{status}</small></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section id="contact" className="contact-section section-pad">
-          <div className="container contact-layout"><div className="contact-copy"><SectionHeading kicker="07 — Contact" title="Have an idea with a little spark?" copy="Tell me what you&apos;re building, researching, or imagining. I&apos;d love to hear the thinking behind it." /><div className="contact-links"><a href="mailto:genfahh@gmail.com"><Mail size={17} /><span>genfahh@gmail.com</span><ArrowUpRight size={15} /></a><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer"><Linkedin size={17} /><span>LinkedIn / connect</span><ArrowUpRight size={15} /></a><a href="https://github.com/" target="_blank" rel="noreferrer"><Github size={17} /><span>GitHub / explore</span><ArrowUpRight size={15} /></a><a href="https://www.instagram.com/genfahh/?stkn=MWJoaDRzcndhdGlqeA==" target="_blank" rel="noreferrer"><Instagram size={17} /><span>Instagram / @genfahh</span><ArrowUpRight size={15} /></a></div></div><form className="contact-form reveal-up delay-1" onSubmit={handleSubmit}><div className="form-heading"><span>Start a conversation</span><Send size={18} /></div><label>Name<input type="text" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Your name" /></label><label>Email<input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="you@example.com" /></label><label>Subject<input type="text" value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder="What are you working on?" /></label><label>Message<textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} placeholder="A few words about the idea..." rows={4} /></label>{formError && <p className="form-message error">{formError}</p>}{formSent && <p className="form-message success"><Check size={15} /> Message received — I&apos;ll get back to you soon.</p>}<button className="button button-primary form-submit" type="submit">Send message <ArrowUpRight size={17} /></button></form></div>
+          <div className="container contact-layout"><div className="contact-copy"><SectionHeading kicker="07 — Contact" title="Have an idea with a little spark?" copy="Tell me what you&apos;re building, researching, or imagining. I&apos;d love to hear the thinking behind it." /><div className="contact-links"><a href="mailto:genfahhteam@gmail.com"><Mail size={17} /><span>genfahhteam@gmail.com</span><ArrowUpRight size={15} /></a><a href="https://www.linkedin.com/in/monisha-t-809753375" target="_blank" rel="noreferrer"><Linkedin size={17} /><span>LinkedIn / connect</span><ArrowUpRight size={15} /></a><a href="https://github.com/monisha526" target="_blank" rel="noreferrer"><Github size={17} /><span>GitHub / explore</span><ArrowUpRight size={15} /></a><a href="https://github.com/Genfahh" target="_blank" rel="noreferrer"><Github size={17} /><span>GENFAHH GitHub / explore</span><ArrowUpRight size={15} /></a><a href="https://www.instagram.com/_genfahh_/" target="_blank" rel="noreferrer"><Instagram size={17} /><span>Instagram / @_genfahh_</span><ArrowUpRight size={15} /></a></div></div><form className="contact-form reveal-up delay-1" onSubmit={handleSubmit}><div className="form-heading"><span>Start a conversation</span><Send size={18} /></div><label>Name<input required type="text" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Your name" /></label><label>Email<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="you@example.com" /></label><label>Subject<input required type="text" value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder="What are you working on?" /></label><label>Message<textarea required value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} placeholder="A few words about the idea..." rows={4} /></label>{formError && <p className="form-message error">{formError}</p>}{formSent && <p className="form-message success"><Check size={15} /> Your email app should open with this message prepared. Press Send there to deliver it.</p>}<button className="button button-primary form-submit" type="submit">Send message <ArrowUpRight size={17} /></button></form></div>
         </section>
       </main>
 
-      <footer className="site-footer"><div className="container footer-top"><a className="brand" href="#home" onClick={(event) => { event.preventDefault(); scrollTo("home"); }}><MiniLogo /><span>genfahh<span className="brand-dot">.</span></span></a><p>Building technology with intent.</p><button type="button" onClick={() => scrollTo("home")}><ArrowUpRight size={16} /> Back to top</button></div><div className="container footer-bottom"><span>© 2025 genfahh. Designed &amp; built with curiosity.</span><span>AI / DATA / DIGITAL CRAFT</span></div></footer>
+      <footer className="site-footer"><div className="container footer-top"><a className="brand" href="#home" onClick={(event) => { event.preventDefault(); scrollTo("home"); }}><MiniLogo /><span>genfahh<span className="brand-dot">.</span></span></a><p>Building technology with intent.</p><button type="button" onClick={() => scrollTo("home")}><ArrowUpRight size={16} /> Back to top</button></div><div className="container footer-bottom"><span>© 2026 genfahh. Designed &amp; built with curiosity.</span><span>AI / DATA / DIGITAL CRAFT</span></div></footer>
 
       {showTop && <button className="scroll-top" type="button" onClick={() => scrollTo("home")} aria-label="Scroll to top"><ArrowUpRight size={17} /></button>}
       {toast && <div className="toast"><Check size={16} /> {toast}</div>}
-      {selectedProject && <div className="modal-backdrop" role="presentation" onClick={() => setSelectedProject(null)}><div className="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSelectedProject(null)} aria-label="Close project details"><X size={19} /></button><span className={`modal-icon accent-${selectedProject.accent}`}><selectedProject.icon size={25} /></span><span className="kicker">{selectedProject.eyebrow}</span><h2 id="project-modal-title">{selectedProject.title}</h2><p>{selectedProject.description}</p><div className="modal-data"><div><span>Focus</span><strong>{selectedProject.category === "web" ? "Product design" : selectedProject.category === "ai" ? "Applied AI" : "Research system"}</strong></div><div><span>Tools</span><strong>{selectedProject.tags.join(" · ")}</strong></div><div><span>Status</span><strong>Concept / prototype</strong></div></div><div className="modal-actions"><button className="button button-primary" type="button" onClick={() => showPlaceholderToast("Demo link ready to connect.")}>Open demo <ExternalLink size={15} /></button><button className="button button-quiet" type="button" onClick={() => showPlaceholderToast("GitHub link ready to connect.")}>View code <Github size={15} /></button></div></div></div>}
+      {selectedProject && <div className="modal-backdrop" role="presentation" onClick={() => setSelectedProject(null)}><div className="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSelectedProject(null)} aria-label="Close project details"><X size={19} /></button><span className={`modal-icon accent-${selectedProject.accent}`}><selectedProject.icon size={25} /></span><span className="kicker">{selectedProject.eyebrow}</span><h2 id="project-modal-title">{selectedProject.title}</h2><p>{selectedProject.description}</p><div className="modal-data"><div><span>Focus</span><strong>{selectedProject.category === "web" ? "Product design" : selectedProject.category === "ai" ? "Applied AI" : "Research system"}</strong></div><div><span>Tools</span><strong>{selectedProject.tags.join(" · ")}</strong></div><div><span>Status</span><strong>Concept / prototype</strong></div></div><div className="modal-actions"><button className="button button-primary" type="button" onClick={() => showToast("No live demo is published for this project yet. Check the GitHub repositories for available code.")}>Live demo information <ExternalLink size={15} /></button><button className="button button-quiet" type="button" onClick={() => openProjectGitHubSearch(selectedProject.title)}>Find code on GitHub <Github size={15} /></button></div></div></div>}
     </div>
   );
 }
